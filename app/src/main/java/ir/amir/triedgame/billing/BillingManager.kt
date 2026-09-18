@@ -113,12 +113,8 @@ class BillingManager(
         }
     }
 
-    /** Must be forwarded from the hosting Activity's onActivityResult. */
-    fun handleActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean =
-        helper?.handleActivityResult(requestCode, resultCode, data) ?: false
-
     fun dispose() {
-        helper?.disposeWhenFinished()
+        helper?.dispose()
         helper = null
     }
 }

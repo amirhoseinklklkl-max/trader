@@ -57,11 +57,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        billingManager?.handleActivityResult(requestCode, resultCode, data)
-    }
-
     override fun onDestroy() {
         billingManager?.dispose()
         super.onDestroy()

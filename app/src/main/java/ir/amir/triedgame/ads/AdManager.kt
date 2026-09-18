@@ -60,10 +60,6 @@ class AdManager(private val context: Context, private val repository: GameReposi
                 onResult(isRewarded)
             }
 
-            override fun onError(placementId: String, reason: String) {
-                Adivery.removePlacementListener(placementId)
-                onResult(false)
-            }
         })
 
         Adivery.showAd(placementId)

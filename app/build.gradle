@@ -102,8 +102,8 @@ dependencies {
 tasks.register('inspectDeps') {
     doLast {
         configurations.debugCompileClasspath.files.each { f ->
-            def n = f.name.toLowerCase()
-            if (n.contains('myket') || n.contains('adivery')) {
+            def p = f.absolutePath.toLowerCase()
+            if (p.contains('myket') || p.contains('adivery')) {
                 println "===== FOUND: ${f.absolutePath} ====="
             }
         }

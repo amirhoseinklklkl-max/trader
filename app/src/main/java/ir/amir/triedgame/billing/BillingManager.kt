@@ -4,21 +4,16 @@ import android.app.Activity
 import android.content.Intent
 import android.util.Log
 import ir.amir.triedgame.BuildConfig
-import ir.market.billingclient.IabHelper
-import ir.market.billingclient.IabResult
-import ir.market.billingclient.Inventory
-import ir.market.billingclient.Purchase
+import ir.myket.billingclient.IabHelper
+import ir.myket.billingclient.util.IabResult
+import ir.myket.billingclient.util.Inventory
+import ir.myket.billingclient.util.Purchase
 
 /**
  * Wraps Myket's IabHelper for the three consumable wallet top-up packages.
  * All three are consumable: the user can buy any of them repeatedly, each
  * purchase is consumed immediately after being verified/credited so it
  * becomes available for purchase again right away.
- *
- * NOTE: the myket-billing-client package name below (ir.market.billingclient)
- * matches the library's published artifact; if Android Studio's autocomplete
- * shows a different package after Gradle sync, update these imports to match
- * -- the class names (IabHelper, IabResult, Inventory, Purchase) stay the same.
  */
 class BillingManager(
     private val activity: Activity,

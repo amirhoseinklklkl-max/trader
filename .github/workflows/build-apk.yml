@@ -47,9 +47,15 @@ jobs:
             INNER_JAR=$(find /tmp/myket_extract -iname "classes.jar" | head -1)
             if [ -n "$INNER_JAR" ]; then
               unzip -l "$INNER_JAR" | grep '\.class'
+              mkdir -p /tmp/myket_classes
+              unzip -o "$INNER_JAR" -d /tmp/myket_classes > /dev/null
             else
               find /tmp/myket_extract -iname "*.class"
             fi
+            echo ""
+            echo "----- javap: ir.myket.billingclient.IabHelper (real public methods) -----"
+            IABHELPER_CLASS=$(find /tmp/myket_classes /tmp/myket_extract -iname "IabHelper.class" 2>/dev/null | head -1)
+            if [ -n "$IABHELPER_CLASS" ]; then javap -p "$IABHELPER_CLASS"; fi
           fi
 
           echo ""

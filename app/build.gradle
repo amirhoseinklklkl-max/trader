@@ -97,3 +97,15 @@ dependencies {
 
     debugImplementation 'androidx.compose.ui:ui-tooling'
 }
+
+// TEMPORARY DIAGNOSTIC TASK - remove once the Myket/Adivery import issues are fixed.
+tasks.register('inspectDeps') {
+    doLast {
+        configurations.debugCompileClasspath.files.each { f ->
+            def n = f.name.toLowerCase()
+            if (n.contains('myket') || n.contains('adivery')) {
+                println "===== FOUND: ${f.absolutePath} ====="
+            }
+        }
+    }
+}

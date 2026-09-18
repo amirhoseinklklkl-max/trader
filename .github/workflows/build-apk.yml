@@ -24,9 +24,38 @@ jobs:
           gradle-version: 8.7
 
       - name: Build debug APK
+        id: build
         run: gradle assembleDebug --stacktrace
+        continue-on-error: true
+
+      - name: Inspect Myket + Adivery library classes
+        if: always()
+        run: |
+          echo "===== Myket billing-client jar: full class list ====="
+          MYKET_JAR=$(find ~/.gradle/caches/modules-2 -iname "myket-billing-client*.jar" | head -1)
+          echo "Jar path: $MYKET_JAR"
+          if [ -n "$MYKET_JAR" ]; then unzip -l "$MYKET_JAR" | grep '\.class'; fi
+
+          echo ""
+          echo "===== Adivery sdk jar: AdiveryListener method signatures ====="
+          ADIVERY_JAR=$(find ~/.gradle/caches/modules-2 -ipath "*com.adivery*" -iname "*.jar" | grep -i "sdk" | head -1)
+          echo "Jar path: $ADIVERY_JAR"
+          if [ -n "$ADIVERY_JAR" ]; then
+            mkdir -p /tmp/adivery_extract
+            unzip -o "$ADIVERY_JAR" "com/adivery/sdk/AdiveryListener.class" -d /tmp/adivery_extract || true
+            javap -p /tmp/adivery_extract/com/adivery/sdk/AdiveryListener.class || true
+          fi
+
+      - name: Report build result
+        if: always()
+        run: |
+          if [ "${{ steps.build.outcome }}" != "success" ]; then
+            echo "Build step failed - see 'Build debug APK' log above for the real error."
+            exit 1
+          fi
 
       - name: Upload APK artifact
+        if: steps.build.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
           name: TraderShow-debug-apk

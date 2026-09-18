@@ -31,19 +31,25 @@ jobs:
       - name: Inspect Myket + Adivery library classes
         if: always()
         run: |
+          gradle inspectDeps -q > /tmp/deps.txt || true
+          cat /tmp/deps.txt
+          MYKET_JAR=$(grep -m1 -i "myket" /tmp/deps.txt | sed -E 's/.*FOUND: (.*) =====/\1/')
+          ADIVERY_JAR=$(grep -m1 -i "adivery" /tmp/deps.txt | sed -E 's/.*FOUND: (.*) =====/\1/')
+
+          echo ""
           echo "===== Myket billing-client jar: full class list ====="
-          MYKET_JAR=$(find ~/.gradle/caches/modules-2 -iname "myket-billing-client*.jar" | head -1)
           echo "Jar path: $MYKET_JAR"
           if [ -n "$MYKET_JAR" ]; then unzip -l "$MYKET_JAR" | grep '\.class'; fi
 
           echo ""
           echo "===== Adivery sdk jar: AdiveryListener method signatures ====="
-          ADIVERY_JAR=$(find ~/.gradle/caches/modules-2 -ipath "*com.adivery*" -iname "*.jar" | grep -i "sdk" | head -1)
           echo "Jar path: $ADIVERY_JAR"
           if [ -n "$ADIVERY_JAR" ]; then
             mkdir -p /tmp/adivery_extract
-            unzip -o "$ADIVERY_JAR" "com/adivery/sdk/AdiveryListener.class" -d /tmp/adivery_extract || true
-            javap -p /tmp/adivery_extract/com/adivery/sdk/AdiveryListener.class || true
+            unzip -o "$ADIVERY_JAR" -d /tmp/adivery_extract > /dev/null || true
+            LISTENER_CLASS=$(find /tmp/adivery_extract -iname "AdiveryListener.class" | head -1)
+            echo "Listener class: $LISTENER_CLASS"
+            if [ -n "$LISTENER_CLASS" ]; then javap -p "$LISTENER_CLASS" || true; fi
           fi
 
       - name: Report build result

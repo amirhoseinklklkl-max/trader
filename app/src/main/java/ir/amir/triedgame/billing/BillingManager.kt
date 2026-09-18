@@ -65,7 +65,7 @@ class BillingManager(
     private fun queryInventoryAndConsumePending() {
         val h = helper ?: return
         try {
-            h.queryInventoryAsync(false, SKUS, null) { result: IabResult, inventory: Inventory? ->
+            h.queryInventoryAsync(false, SKUS) { result: IabResult, inventory: Inventory? ->
                 if (result.isFailure || inventory == null) {
                     Log.e(TAG, "queryInventory failed: ${result.message}")
                     return@queryInventoryAsync

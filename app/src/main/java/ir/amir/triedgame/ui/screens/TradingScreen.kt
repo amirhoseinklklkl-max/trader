@@ -133,4 +133,4 @@ private fun PositionRow(position: Position, viewModel: GameViewModel) {
 
 // Small helper so we don't have to import `clickable` with its full ripple config everywhere.
 private fun Modifier.clickableSafe(onClick: () -> Unit): Modifier =
-    this.then(androidx.compose.foundation.clickable { onClick() })
+    this.clickable { onClick() }

@@ -31,26 +31,45 @@ jobs:
       - name: Inspect Myket + Adivery library classes
         if: always()
         run: |
-          gradle inspectDeps -q > /tmp/deps.txt || true
+          set +e
+          gradle inspectDeps -q > /tmp/deps.txt
           cat /tmp/deps.txt
-          MYKET_JAR=$(grep -m1 -i "myket" /tmp/deps.txt | sed -E 's/.*FOUND: (.*) =====/\1/')
-          ADIVERY_JAR=$(grep -m1 -i "adivery" /tmp/deps.txt | sed -E 's/.*FOUND: (.*) =====/\1/')
+          MYKET_ART=$(grep -m1 -i "myket" /tmp/deps.txt | sed -E 's/.*FOUND: (.*) =====/\1/')
+          ADIVERY_ART=$(grep -m1 -i "adivery" /tmp/deps.txt | sed -E 's/.*FOUND: (.*) =====/\1/')
 
           echo ""
-          echo "===== Myket billing-client jar: full class list ====="
-          echo "Jar path: $MYKET_JAR"
-          if [ -n "$MYKET_JAR" ]; then unzip -l "$MYKET_JAR" | grep '\.class'; fi
-
-          echo ""
-          echo "===== Adivery sdk jar: AdiveryListener method signatures ====="
-          echo "Jar path: $ADIVERY_JAR"
-          if [ -n "$ADIVERY_JAR" ]; then
-            mkdir -p /tmp/adivery_extract
-            unzip -o "$ADIVERY_JAR" -d /tmp/adivery_extract > /dev/null || true
-            LISTENER_CLASS=$(find /tmp/adivery_extract -iname "AdiveryListener.class" | head -1)
-            echo "Listener class: $LISTENER_CLASS"
-            if [ -n "$LISTENER_CLASS" ]; then javap -p "$LISTENER_CLASS" || true; fi
+          echo "===== Myket billing-client: full class list ====="
+          echo "Artifact path: $MYKET_ART"
+          if [ -n "$MYKET_ART" ]; then
+            mkdir -p /tmp/myket_extract
+            unzip -o "$MYKET_ART" -d /tmp/myket_extract > /dev/null
+            # .aar files hold their code in an inner classes.jar
+            INNER_JAR=$(find /tmp/myket_extract -iname "classes.jar" | head -1)
+            if [ -n "$INNER_JAR" ]; then
+              unzip -l "$INNER_JAR" | grep '\.class'
+            else
+              find /tmp/myket_extract -iname "*.class"
+            fi
           fi
+
+          echo ""
+          echo "===== Adivery sdk: AdiveryListener method signatures ====="
+          echo "Artifact path: $ADIVERY_ART"
+          if [ -n "$ADIVERY_ART" ]; then
+            mkdir -p /tmp/adivery_extract
+            unzip -o "$ADIVERY_ART" -d /tmp/adivery_extract > /dev/null
+            INNER_JAR=$(find /tmp/adivery_extract -iname "classes.jar" | head -1)
+            if [ -n "$INNER_JAR" ]; then
+              mkdir -p /tmp/adivery_classes
+              unzip -o "$INNER_JAR" -d /tmp/adivery_classes > /dev/null
+              LISTENER_CLASS=$(find /tmp/adivery_classes -iname "AdiveryListener.class" | head -1)
+            else
+              LISTENER_CLASS=$(find /tmp/adivery_extract -iname "AdiveryListener.class" | head -1)
+            fi
+            echo "Listener class: $LISTENER_CLASS"
+            if [ -n "$LISTENER_CLASS" ]; then javap -p "$LISTENER_CLASS"; fi
+          fi
+          exit 0
 
       - name: Report build result
         if: always()
